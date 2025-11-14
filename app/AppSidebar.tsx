@@ -45,7 +45,7 @@ export default function AppSiderbar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
-            <h1 className="text-slate-950 font-bold text-xl">Productivity</h1>
+            <h1 className="text-slate-950 font-bold text-xl">Achieve</h1>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
