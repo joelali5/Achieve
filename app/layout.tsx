@@ -2,8 +2,8 @@ import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSiderbar from "./AppSidebar";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { ModeToggle } from "@/components/ui/ModeToggle";
-import Navbar from "@/components/ui/Navbar";
+import { ModeToggle } from "@/components/ModeToggle";
+import Navbar from "@/components/Navbar";
 import AuthProvider from "./auth/Provider";
 
 export default function RootLayout({
@@ -23,7 +23,7 @@ export default function RootLayout({
           >
             <SidebarProvider>
               <AppSiderbar />
-              <main className="border-2 border-red-500 w-full flex justify-between">
+              <main className="w-full flex justify-between">
                 <SidebarTrigger />
                 {children}
                 <div className="inline-flex space-x-4 items-center h-fit">
