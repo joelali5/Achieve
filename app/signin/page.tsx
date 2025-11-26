@@ -1,5 +1,6 @@
 "use client";
 
+import { FcGoogle } from "react-icons/fc";
 import {
   Field,
   FieldLabel,
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
 import {
   Card,
   CardContent,
@@ -18,16 +20,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
-import type { AxiosError } from "axios";
 import Link from "next/link";
+import { Separator } from "@radix-ui/react-separator";
 import { useState } from "react";
 import { FaRegEye } from "react-icons/fa6";
 import { FaRegEyeSlash } from "react-icons/fa6";
 
-const regSchema = z.object({
+const signInSchema = z.object({
   email: z.email(),
   password: z
     .string()
@@ -38,42 +38,40 @@ const regSchema = z.object({
     .regex(/[\W_]/, "Password must contain at least one special character"),
 });
 
-type formFields = z.infer<typeof regSchema>;
+type formFields = z.infer<typeof signInSchema>;
 
-const Register = () => {
+const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
   const form = useForm<formFields>({
     defaultValues: {
       email: "",
       password: "",
     },
-    resolver: zodResolver(regSchema),
+    resolver: zodResolver(signInSchema),
   });
 
   const onSubmit: SubmitHandler<formFields> = async (data) => {
-    try {
-      await axios.post("/api/register", data);
-      router.push("/api/auth/signin");
-      router.refresh();
-    } catch (error) {
-      const err = error as AxiosError<{ error: string }>;
-      console.log(err);
-      form.setError("root", {
-        message: err.response?.data?.error || "Something went wrong",
-      });
+    const result = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+    if (result?.error) {
+      form.setError("root", { message: result.error });
+      return;
     }
+    window.location.assign("/");
   };
 
   return (
     <div className="w-full flex items-center justify-center min-h-screen py-2">
-      <Card className="w-dvw sm:max-w-md mt-5 mb-5 h-3/5">
+      <Card className="w-dvw sm:max-w-md mt-5 mb-5">
         <CardHeader>
-          <CardTitle>Create Account</CardTitle>
-          <CardDescription>Enter your details to get started</CardDescription>
+          <CardTitle>Login</CardTitle>
+          <CardDescription>Enter your details to sign in</CardDescription>
         </CardHeader>
         <CardContent>
-          <form id="register-form" onSubmit={form.handleSubmit(onSubmit)}>
+          <form id="signin-form" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
               <Controller
                 name="email"
@@ -84,7 +82,7 @@ const Register = () => {
                     <Input
                       {...field}
                       type="email"
-                      placeholder="yourname@example.com"
+                      placeholder="Enter your email"
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -98,15 +96,16 @@ const Register = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel>Password</FieldLabel>
-                    <div className="relative">
+                    <div className="relative w-full">
                       <Input
                         {...field}
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter a secure password"
+                        placeholder="Enter your password"
+                        className="pr-10"
                       />
                       <button
-                        className="absolute inset-y-0 right-3 text-gray-500 flex items-center"
                         onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-3 flex items-center text-gray-500"
                       >
                         {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
                       </button>
@@ -120,34 +119,34 @@ const Register = () => {
             </FieldGroup>
           </form>
         </CardContent>
-        <div className="flex space-x-0">
-          {form.formState.errors.root && (
-            <FieldError
-              className="ml-7"
-              errors={[form.formState.errors.root]}
-            />
-          )}{" "}
-          {form.formState.errors.root && (
-            <Link
-              href="/api/auth/signin"
-              className="ml-5 text-sm underline text-blue-600"
-            >
-              Signin here
-            </Link>
-          )}
-        </div>
         <CardFooter className="flex flex-col">
-          <Field orientation="horizontal">
+          <Field
+            orientation="horizontal"
+            className="flex flex-col justify-center"
+          >
             <Button
               type="submit"
-              form="register-form"
-              className="cursor-pointer w-full"
+              form="signin-form"
+              className="cursor-pointer w-full py-6"
               disabled={form.formState.isSubmitting}
             >
-              Register
+              Sign In with Credentials
+            </Button>
+            <div className="relative flex items-center justify-center my-4 w-auto">
+              <Separator className="flex-1 bg-slate-400 h-[1px]" />
+              <span className="text-sm text-muted-foreground px-2">Or</span>
+              <Separator className="flex-1 text-slate-500 bg-slate-400 h-[1px]" />
+            </div>
+            <Button
+              type="submit"
+              onClick={() => signIn("google", { callbackUrl: "/" })}
+              className="w-full py-6 rounded-md cursor-pointer"
+            >
+              <FcGoogle size={30} className="text-4xl" />
+              Sign in with Google
             </Button>
           </Field>
-          <div className="w-full mt-3 md:text-sm text-xs">
+          <div className="mt-4 md:text-sm text-xs w-full">
             {form.formState.errors.root && (
               <FieldError
                 className="ml-7"
@@ -155,9 +154,9 @@ const Register = () => {
               />
             )}
             <FieldGroup className="flex flex-row items-center mx-6 sm:mx-0">
-              <span>Already a member?</span>
-              <Link href="/api/auth/signin" className="text-blue-600">
-                Signin here
+              <span>Not registered?</span>
+              <Link href="/register" className="text-blue-600">
+                Create account
               </Link>
             </FieldGroup>
           </div>
@@ -167,4 +166,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default SignInPage;
