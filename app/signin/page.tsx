@@ -26,6 +26,7 @@ import { Separator } from "@radix-ui/react-separator";
 import { useState } from "react";
 import { FaRegEye } from "react-icons/fa6";
 import { FaRegEyeSlash } from "react-icons/fa6";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const signInSchema = z.object({
   email: z.email(),
@@ -65,103 +66,128 @@ const SignInPage = () => {
 
   return (
     <div className="w-full flex items-center justify-center min-h-screen py-2">
-      <Card className="w-dvw sm:max-w-md mt-5 mb-5">
-        <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Enter your details to sign in</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form id="signin-form" onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup>
-              <Controller
-                name="email"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Email</FieldLabel>
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder="Enter your email"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                name="password"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Password</FieldLabel>
-                    <div className="relative w-full">
+      {form.formState.isSubmitting ? (
+        <Card className="w-dvw sm:max-w-md mt-5 mb-5 space-y-13">
+          <CardHeader>
+            <Skeleton className="h-4 w-30 rounded-xl" />
+            <Skeleton className="h-4 w-[250px] rounded-xl" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-4 w-30 rounded-xl mb-2" />
+            <Skeleton className="h-6 w-full rounded-xl mb-5" />
+
+            <Skeleton className="h-4 w-30 rounded-xl mb-2" />
+            <Skeleton className="h-6 w-full rounded-xl" />
+          </CardContent>
+
+          <CardFooter className="flex flex-col space-y-3">
+            <Skeleton className="h-6 w-full rounded-xl" />
+            <Skeleton className="h-6 w-full rounded-xl" />
+          </CardFooter>
+          <div className="flex space-x-2 ml-5">
+            <Skeleton className="h-4 w-30 rounded-xl" />
+            <Skeleton className="h-4 w-30 rounded-xl" />
+          </div>
+        </Card>
+      ) : (
+        <Card className="w-dvw sm:max-w-md mt-5 mb-5">
+          <CardHeader>
+            <CardTitle>Login</CardTitle>
+            <CardDescription>Enter your details to sign in</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form id="signin-form" onSubmit={form.handleSubmit(onSubmit)}>
+              <FieldGroup>
+                <Controller
+                  name="email"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>Email</FieldLabel>
                       <Input
                         {...field}
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        className="pr-10"
+                        type="email"
+                        placeholder="Enter your email"
                       />
-                      <button
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                      >
-                        {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
-                      </button>
-                    </div>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            </FieldGroup>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col">
-          <Field
-            orientation="horizontal"
-            className="flex flex-col justify-center"
-          >
-            <Button
-              type="submit"
-              form="signin-form"
-              className="cursor-pointer w-full py-6"
-              disabled={form.formState.isSubmitting}
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="password"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>Password</FieldLabel>
+                      <div className="relative w-full">
+                        <Input
+                          {...field}
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          className="pr-10"
+                        />
+                        <p
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                        >
+                          {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                        </p>
+                      </div>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
+            </form>
+          </CardContent>
+          <CardFooter className="flex flex-col">
+            <Field
+              orientation="horizontal"
+              className="flex flex-col justify-center"
             >
-              Sign In with Credentials
-            </Button>
-            <div className="relative flex items-center justify-center my-4 w-auto">
-              <Separator className="flex-1 bg-slate-400 h-[1px]" />
-              <span className="text-sm text-muted-foreground px-2">Or</span>
-              <Separator className="flex-1 text-slate-500 bg-slate-400 h-[1px]" />
+              <Button
+                type="submit"
+                form="signin-form"
+                className="cursor-pointer w-full py-6"
+                disabled={form.formState.isSubmitting}
+              >
+                Sign In with Credentials
+              </Button>
+              <div className="relative flex items-center justify-center my-4 w-auto">
+                <Separator className="flex-1 bg-slate-400 h-[1px]" />
+                <span className="text-sm text-muted-foreground px-2">Or</span>
+                <Separator className="flex-1 text-slate-500 bg-slate-400 h-[1px]" />
+              </div>
+              <Button
+                type="submit"
+                onClick={() => signIn("google", { callbackUrl: "/" })}
+                className="w-full py-6 rounded-md cursor-pointer"
+              >
+                <FcGoogle size={30} className="text-4xl" />
+                Sign in with Google
+              </Button>
+            </Field>
+            <div className="mt-4 md:text-sm text-xs w-full">
+              {form.formState.errors.root && (
+                <FieldError
+                  className="ml-7"
+                  errors={[form.formState.errors.root]}
+                />
+              )}
+              <FieldGroup className="flex flex-row items-center mx-6 sm:mx-0">
+                <span>Not registered?</span>
+                <Link href="/register" className="text-blue-600">
+                  Create account
+                </Link>
+              </FieldGroup>
             </div>
-            <Button
-              type="submit"
-              onClick={() => signIn("google", { callbackUrl: "/" })}
-              className="w-full py-6 rounded-md cursor-pointer"
-            >
-              <FcGoogle size={30} className="text-4xl" />
-              Sign in with Google
-            </Button>
-          </Field>
-          <div className="mt-4 md:text-sm text-xs w-full">
-            {form.formState.errors.root && (
-              <FieldError
-                className="ml-7"
-                errors={[form.formState.errors.root]}
-              />
-            )}
-            <FieldGroup className="flex flex-row items-center mx-6 sm:mx-0">
-              <span>Not registered?</span>
-              <Link href="/register" className="text-blue-600">
-                Create account
-              </Link>
-            </FieldGroup>
-          </div>
-        </CardFooter>
-      </Card>
+          </CardFooter>
+        </Card>
+      )}
     </div>
   );
 };
